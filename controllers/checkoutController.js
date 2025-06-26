@@ -20,6 +20,7 @@ export const makeCheckout = async (req, res) => {
       packageDate,
       packageDetails,
       amount,
+      totalPerPerson,
       name,
       advancePayment,
       customers
@@ -58,6 +59,9 @@ export const makeCheckout = async (req, res) => {
       imageUrl = result.secure_url;
     }
 
+
+    console.log(req.file);
+    
     const newCheckout = new Customer({
       packageName,
       packageDate,
@@ -65,7 +69,11 @@ export const makeCheckout = async (req, res) => {
       customers: parsedCustomers,
       transactionId,
       bookingNumber: pnr,
-      screenshot: req.file?.originalname,
+      amount,
+      totalPerPerson,
+      advancePayment,
+      image: imageUrl,
+
     });
 
     await newCheckout.save();
@@ -84,13 +92,18 @@ export const makeCheckout = async (req, res) => {
 
 
 export const getAllBookings = async (req, res) => {
-  try {
-    const bookings = await Customer.find().sort({ createdAt: -1 }); // Most recent first
-    return res.status(200).json({
-      success: true,
-      count: bookings.length,
-      data: bookings,
-    });
+  const { packageNumber } = req.params;
+  
+    try {
+      const bookings = await Customer.find({
+        "packageDetails.packageNumber": packageNumber
+      });
+  
+      if (!bookings || bookings.length === 0) {
+        return res.status(404).json({ success: false, message: "No bookings found for this package number" });
+      }
+  
+      res.status(200).json({ success: true, data: bookings });
   } catch (error) {
     console.error("Error fetching all bookings:", error);
     return res.status(500).json({ success: false, message: error.message });

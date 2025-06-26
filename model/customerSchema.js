@@ -32,6 +32,7 @@ const packageSchema = new mongoose.Schema({
   ],
   customers: [customerInfoSchema],
   amount: Number,
+  totalPerPerson:Number,
   name: String,
   advancePayment:Number,
   bookingNumber: String,
@@ -40,6 +41,8 @@ const packageSchema = new mongoose.Schema({
     type:String,
   
   },
-});
+  
+},
+ { timestamps: true });
 
 export const Customer = mongoose.model("Customer", packageSchema);

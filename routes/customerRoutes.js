@@ -5,6 +5,6 @@ import { upload } from "../middleware/uploadMiddleWare.js";
 const router = express.Router();
 
 router.post("/create",upload.single("image"), makeCheckout);
-router.get("/bookings", getAllBookings);
-router.get("/bookings/:id", getBookingById);
+router.get("/bookings/:packageNumber", getAllBookings);
+router.get("/bookingdetail/:id", getBookingById);
 export  default router
