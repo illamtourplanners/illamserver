@@ -129,3 +129,33 @@ export const getBookingById = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+
+export const getAllBookingsCount = async (req, res) => {
+
+
+  try {
+    const count = await Customer.countDocuments({
+      "packageDetails.packageNumber": packageNumber
+    });
+
+    if (count === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No bookings found for this package number"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count
+    });
+  } catch (error) {
+    console.error("Error counting bookings:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
