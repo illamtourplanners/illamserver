@@ -13,7 +13,7 @@ function generatePNR() {
 
 export const makeCheckout = async (req, res) => {
   try {
-    console.log("BODY:", req.body); 
+
 
     const {
       packageName,
@@ -60,7 +60,7 @@ export const makeCheckout = async (req, res) => {
     }
 
 
-    console.log(req.file);
+
     
     const newCheckout = new Customer({
       packageName,

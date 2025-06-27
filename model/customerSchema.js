@@ -13,6 +13,12 @@ const customerInfoSchema = new mongoose.Schema({
     required: true,
     match: /^[2-9]{1}[0-9]{11}$/,
   },
+  status: {
+    type: String,
+    enum: ['Pending', 'Boarded', 'Missed'],
+    default: 'Pending', // ✅ now each customer has a status
+  },
+   
 });
 
 
@@ -37,6 +43,11 @@ const packageSchema = new mongoose.Schema({
   advancePayment:Number,
   bookingNumber: String,
   transactionId: String,
+   status: {
+    type: String,
+    enum: ['Pending', 'Boarded', 'Missed'],
+    default: 'Pending',
+  },
    image:{
     type:String,
   

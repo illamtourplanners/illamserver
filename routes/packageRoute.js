@@ -7,5 +7,5 @@ router.post("/create",upload.single("image"), createPackage);
 router.get("/getall", getAllPackages);
 router.get("/getallbyid/:id", getPackageById);
 router.put("/update", updatePackage);
-router.delete("/delete", deletePackage);
+router.delete("/delete/:id", deletePackage);
 export  default router
