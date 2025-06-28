@@ -159,3 +159,23 @@ export const getAllBookingsCount = async (req, res) => {
     });
   }
 };
+
+
+export const getByTransactionId = async (req, res) => {
+  const { transactionId } = req.params;
+  
+    try {
+      const bookings = await Customer.find({
+        "transactionId": transactionId
+      });
+  
+      if (!bookings || bookings.length === 0) {
+        return res.status(404).json({ success: false, message: "No bookings found for this package number" });
+      }
+  
+      res.status(200).json({ success: true, data: bookings });
+  } catch (error) {
+    console.error("Error fetching all bookings:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
