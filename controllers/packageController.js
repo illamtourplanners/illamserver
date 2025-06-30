@@ -155,20 +155,38 @@ export const updatePackage = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    if (updates.PricePerPerson && (typeof updates.PricePerPerson !== "number" || updates.PricePerPerson <= 0)) {
-      return res.status(400).json({
-        success: false,
-        message: "PricePerPerson must be a positive number",
+    // Validate PricePerPerson
+    // if (
+    //   updates.PricePerPerson &&
+    //   (typeof updates.PricePerPerson !== "number" || updates.PricePerPerson <= 0)
+    // ) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "PricePerPerson must be a positive number",
+    //   });
+    // }
+
+    // Handle image upload if file is present
+    if (req.file) {
+      const result = await cloudinaryInstance.uploader.upload(req.file.path, {
+        folder: "tour-packages",
       });
+      updates.image = result.secure_url;
     }
 
-    const updatedPackage = await Package.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
+    // Perform update
+    const updatedPackage = await Package.findByIdAndUpdate(id, updates, {
+      new: true,
+      runValidators: true,
+    });
+
     if (!updatedPackage) {
       return res.status(404).json({
         success: false,
         message: "Package not found",
       });
     }
+
     return res.status(200).json({
       success: true,
       message: "Package updated successfully",

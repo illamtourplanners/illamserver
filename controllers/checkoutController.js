@@ -138,11 +138,19 @@ export const getBookingById = async (req, res) => {
 export const confirmBooking = async (req, res) => {
   try {
     const {
-      customerName,
-      customerEmail,
-      customerPhone,
-      packageName,
-      travelDate
+       bookingId,
+  transactionId,
+  customerEmail,
+  customerName,
+  customerPhone,
+  packageName,
+  travelDate,
+  totalPassengers,
+  bookingNumber,
+  allCustomerNames,
+  allPickupPoints,
+  to,
+  seatnumbers
     } = req.body;
 
     console.log(req.body);
@@ -161,6 +169,15 @@ export const confirmBooking = async (req, res) => {
       }
     });
 
+
+const travelDateObj = new Date(travelDate);
+const onlyDate = travelDateObj.toISOString().slice(0, 10);
+
+
+ const allCustomerNamesStr = Array.isArray(allCustomerNames) ? allCustomerNames.join(', ') : allCustomerNames;
+    const allPickupPointsStr = Array.isArray(allPickupPoints) ? allPickupPoints.join(', ') : allPickupPoints;
+
+
     const mailOptions = {
       from: process.env.ADMIN_EMAIL,
       to: customerEmail,
@@ -173,26 +190,34 @@ export const confirmBooking = async (req, res) => {
           <p><strong>Travel Date:</strong> ${new Date(travelDate).toDateString()}</p>
           <p>We look forward to having you on board.</p>
           <br/>
-          <p>Warm regards,<br/><strong>Explore Kerala Team</strong></p>
+          <p>Warm regards,<br/><strong>Vaidehi Holidays</strong></p>
         </div>
       `
     };
 
-    // await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
 
     // ✅ Send WhatsApp Message using Twilio (Plain Text)
-    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+  const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-await client.messages.create({
-  to: `whatsapp:+91${customerPhone}`,
-  from: 'whatsapp:+17245585975', 
-  contentSid: 'HXf434b1dc1eb159d9672752867007c0bc', // Correct content template SID
-  contentVariables: JSON.stringify({
-    first_name: customerName,
-    package: packageName,
-    date: new Date(travelDate).toDateString()
-  })
-});
+    await client.messages.create({
+      to: `whatsapp:+91${customerPhone}`,
+      from: 'whatsapp:+17245585975',
+      contentSid: 'HX172797fc60d7cd326db4b9431574deb8',
+      contentVariables: JSON.stringify({
+        "1": customerName,
+        "2": allPickupPointsStr,
+        "3": to,
+        "4": "Vaidehi Holidays",
+        "5": totalPassengers.toString(),
+        "6": onlyDate,
+        "7": bookingNumber,
+        "8": allCustomerNames,
+        "9": "Not assigned yet",
+        "10": allPickupPointsStr,
+        "11": "+918547854685,+919400440686,+919633628540,+918943806318"
+      })
+    });
     res.status(200).json({ success: true, message: 'Booking confirmed. Email and WhatsApp sent.' });
 
   } catch (error) {
