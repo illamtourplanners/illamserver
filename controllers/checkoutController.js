@@ -4,7 +4,8 @@ dotenv.config();
 import { Customer } from '../model/customerSchema.js';
 import { customerSchema } from '../validation/customerJoi.js';
 import { cloudinaryInstance } from "../config/cloudinaryConfig.js";
-
+import nodemailer from 'nodemailer'
+import twilio from 'twilio';
 function generatePNR() {
   const random = Math.random().toString(36).substring(2, 6).toUpperCase(); // 4 char
   const timePart = Date.now().toString().slice(-6); // last 6 digits of timestamp
@@ -132,6 +133,81 @@ export const getBookingById = async (req, res) => {
 
 
 
+
+
+export const confirmBooking = async (req, res) => {
+  try {
+    const {
+      customerName,
+      customerEmail,
+      customerPhone,
+      packageName,
+      travelDate
+    } = req.body;
+
+    console.log(req.body);
+    
+    // ✅ Check required fields
+    if (!customerName || !customerEmail || !customerPhone || !packageName || !travelDate) {
+      return res.status(400).json({ success: false, message: 'Missing required booking details.' });
+    }
+
+    // ✅ Send Email using Nodemailer
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.ADMIN_EMAIL,
+        pass: process.env.ADMIN_EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.ADMIN_EMAIL,
+      to: customerEmail,
+      subject: 'Booking Confirmation - Explore Kerala',
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+          <h2>Hi ${customerName},</h2>
+          <p>Your booking with <strong>Explore Kerala</strong> is confirmed!</p>
+          <p><strong>Package:</strong> ${packageName}</p>
+          <p><strong>Travel Date:</strong> ${new Date(travelDate).toDateString()}</p>
+          <p>We look forward to having you on board.</p>
+          <br/>
+          <p>Warm regards,<br/><strong>Explore Kerala Team</strong></p>
+        </div>
+      `
+    };
+
+    // await transporter.sendMail(mailOptions);
+
+    // ✅ Send WhatsApp Message using Twilio (Plain Text)
+    const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+await client.messages.create({
+  to: `whatsapp:+91${customerPhone}`,
+  from: 'whatsapp:+17245585975', 
+  contentSid: 'HXf434b1dc1eb159d9672752867007c0bc', // Correct content template SID
+  contentVariables: JSON.stringify({
+    first_name: customerName,
+    package: packageName,
+    date: new Date(travelDate).toDateString()
+  })
+});
+    res.status(200).json({ success: true, message: 'Booking confirmed. Email and WhatsApp sent.' });
+
+  } catch (error) {
+    console.error('Error in confirmBooking:', error);
+    res.status(500).json({ success: false, message: 'Failed to send booking confirmation.' });
+  }
+};
+
+
+
+
+
+
+
+
 export const getAllBookingsCount = async (req, res) => {
 
 
@@ -161,3 +237,24 @@ export const getAllBookingsCount = async (req, res) => {
 };
 
 
+<<<<<<< HEAD
+=======
+export const getByTransactionId = async (req, res) => {
+  const { transactionId } = req.params;
+  
+    try {
+      const bookings = await Customer.find({
+        "transactionId": transactionId
+      });
+  
+      if (!bookings || bookings.length === 0) {
+        return res.status(404).json({ success: false, message: "No bookings found for this package number" });
+      }
+  
+      res.status(200).json({ success: true, data: bookings });
+  } catch (error) {
+    console.error("Error fetching all bookings:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+>>>>>>> dc59509c10910f9ea3345354fa438da37f7e3e0b
