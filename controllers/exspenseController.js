@@ -4,19 +4,21 @@ import expenseSchema from "../model/expenseSchema.js";
 
 export const createExpense = async (req, res) => {
   try {
-    const { category, categoryname, rupee, quantity, paymentMethod } = req.body;
+    const { category, categoryname, rupee, quantity, paymentMethode, date } = req.body;
 
-    // Validate required fields
-    if (!category || !categoryname || !rupee || !quantity || !paymentMethod) {
+    if (!category || !categoryname || !rupee || !quantity || !paymentMethode) {
       return res.status(400).json({ success: false, message: "All fields are required." });
     }
+
+    const finalDate = date || new Date().toISOString().split('T')[0];
 
     const newExpense = new expenseSchema({
       category,
       categoryname,
       rupee,
       quantity,
-      paymentMethod  // 🟢 this now matches frontend
+      paymentMethode,
+      date: finalDate,
     });
 
     await newExpense.save();
@@ -26,6 +28,7 @@ export const createExpense = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
 };
+
 
 
 export const getExpenseById = async (req, res) => {
