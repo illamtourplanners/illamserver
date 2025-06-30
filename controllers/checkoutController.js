@@ -237,8 +237,7 @@ export const getAllBookingsCount = async (req, res) => {
 };
 
 
-<<<<<<< HEAD
-=======
+
 export const getByTransactionId = async (req, res) => {
   const { transactionId } = req.params;
   
@@ -257,4 +256,4 @@ export const getByTransactionId = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
->>>>>>> dc59509c10910f9ea3345354fa438da37f7e3e0b
+
