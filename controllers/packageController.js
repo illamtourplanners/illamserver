@@ -1,6 +1,6 @@
 import { cloudinaryInstance } from "../config/cloudinaryConfig.js";
 import { Package } from "../model/packageSchema.js";
-
+import fs from 'fs'; 
 // CREATE
 function generatePackageNumber() {
   const prefix = "PKG";
@@ -155,6 +155,7 @@ export const updatePackage = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
+
     // Validate PricePerPerson
     // if (
     //   updates.PricePerPerson &&
@@ -167,12 +168,22 @@ export const updatePackage = async (req, res) => {
     // }
 
     // Handle image upload if file is present
-    if (req.file) {
+
+
+
+      if (req.file) {
       const result = await cloudinaryInstance.uploader.upload(req.file.path, {
-        folder: "tour-packages",
+        folder: 'travel-packages',
       });
+
       updates.image = result.secure_url;
+
+      // Delete local file after upload
+      fs.unlink(req.file.path, err => {
+        if (err) console.error('Failed to delete local image:', err);
+      });
     }
+
 
     // Perform update
     const updatedPackage = await Package.findByIdAndUpdate(id, updates, {

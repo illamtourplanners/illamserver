@@ -6,7 +6,10 @@ import dotenv from "dotenv";
 dotenv.config();
 import { dbConnect } from "./config/db.js";
 
+import cookieParser from 'cookie-parser';
 const PORT=process.env.PORT
+
+
 
 
 
@@ -15,7 +18,10 @@ const PORT=process.env.PORT
 
 const app=express()
 // Middlewares
+app.use(cookieParser());
+
 app.use(express.json());
+
 app.use(cors({
   origin: process.env.CORS, 
   credentials: true

@@ -1,9 +1,12 @@
 import jwt from 'jsonwebtoken';
 
 
-export const verifyAdminToken = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
+
+console.log(req.cookies);
+
   
-  const token = req.cookies.AdminToken || req.headers['authorization']?.replace(/^Bearer\s/, '');
+  const token = req.cookies.Admintoken ||  req.headers['authorization']?.replace(/^Bearer\s/, '');
 
 
   if (!token) {
