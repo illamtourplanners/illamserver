@@ -197,7 +197,7 @@ const onlyDate = travelDateObj.toISOString().slice(0, 10);
 
     await transporter.sendMail(mailOptions);
 
-    // ✅ Send WhatsApp Message using Twilio (Plain Text)
+  //   // ✅ Send WhatsApp Message using Twilio (Plain Text)
   const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
     await client.messages.create({
@@ -218,6 +218,25 @@ const onlyDate = travelDateObj.toISOString().slice(0, 10);
         "11": "+918547854685,+919400440686,+919633628540,+918943806318"
       })
     });
+
+const customerIndex=0
+const status="Confirmed"
+const booking = await Customer.findById(bookingId);
+    if (!booking) return res.status(404).json({ success: false, message: "Booking not found" });
+
+    if (!booking.customers[customerIndex])
+      return res.status(400).json({ success: false, message: "Invalid customer index" });
+
+  // Update the status
+    // booking.customers[customerIndex].status = status;
+ booking.status = status;
+    // Tell Mongoose that the 'customers' field was modified
+    booking.markModified('customers');
+    await booking.save();
+
+
+
+
     res.status(200).json({ success: true, message: 'Booking confirmed. Email and WhatsApp sent.' });
 
   } catch (error) {

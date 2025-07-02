@@ -15,7 +15,7 @@ const customerInfoSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'Boarded', 'Missed'],
+     enum: ['Pending', 'Boarded', 'Missed','Confirmed'],
     default: 'Pending', // ✅ now each customer has a status
   },
    
@@ -45,7 +45,7 @@ const packageSchema = new mongoose.Schema({
   transactionId: String,
    status: {
     type: String,
-    enum: ['Pending', 'Boarded', 'Missed'],
+    enum: ['Pending', 'Boarded', 'Missed','Confirmed'],
     default: 'Pending',
   },
    image:{

@@ -44,7 +44,7 @@ export const updateBoardingStatus = async (req, res) => {
   try {
     const { bookingId, customerIndex, status } = req.body;
 
-    console.log(status);
+    console.log(req.body);
     
     const booking = await Customer.findById(bookingId);
     if (!booking) return res.status(404).json({ success: false, message: "Booking not found" });
@@ -54,7 +54,7 @@ export const updateBoardingStatus = async (req, res) => {
 
   // Update the status
     booking.customers[customerIndex].status = status;
- booking.status = status;
+//  booking.status = status;
     // Tell Mongoose that the 'customers' field was modified
     booking.markModified('customers');
     await booking.save();

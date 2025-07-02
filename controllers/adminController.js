@@ -150,3 +150,13 @@ export const dashboardData = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+export const logout = asyncHandler(async (req, res) => {
+    try {
+      res.cookie('Admintoken', '', { httpOnly: true, expires: new Date(0) });
+      res.status(200).json({ success: true, message: 'Admin logged out successfully' });
+    } catch (error) {
+      res.status(500).json({ success: false, error: 'Failed to log out' });
+    }
+  });
