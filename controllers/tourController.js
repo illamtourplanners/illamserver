@@ -50,3 +50,18 @@ export const getallPosts=async(req,res)=>{
     }
 }
 
+
+export const deletePost =async(req,res)=>{
+  try {
+    const {id}=req.params
+    const post = await Tour.findByIdAndDelete(id);
+    if(!post) {
+      return res.status(404).json({status:"failure",message:"Post not found"})
+      }
+      res.status(204).json({status:"success",message:"Post deleted successfully"})
+    
+  } catch (error) {
+    console.log(error);
+    
+  }
+}

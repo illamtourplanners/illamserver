@@ -282,3 +282,25 @@ export const getByTransactionId = async (req, res) => {
   }
 };
 
+export const deleteCustomerFromBooking = async (req, res) => {
+  try {
+    const { bookingId } = req.params;
+
+    const booking = await Customer.findByIdAndDelete(bookingId);
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: "Booking not found" });
+    }
+
+    
+
+    return res.status(200).json({
+      success: true,
+      message: "Customer removed from booking",
+      updatedBooking: booking
+    });
+  } catch (error) {
+    console.error("Error removing customer:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
