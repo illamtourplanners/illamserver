@@ -43,8 +43,9 @@ console.log(req.body);
     
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
   
-    res.cookie('Admintoken', token, { // httpOnly: true,  sameSite: 'None',
-      secure: true, secure: process.env.NODE_ENV === 'production' });
+    res.cookie('Admintoken', token, {  httpOnly: true,  sameSite: 'None',
+      // secure: true,
+       secure: process.env.NODE_ENV === 'production' });
 
   res.status(200).json({ success: true, message: 'Login successful', admin,token });
 });
