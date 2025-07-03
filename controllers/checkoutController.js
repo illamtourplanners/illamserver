@@ -153,7 +153,7 @@ export const confirmBooking = async (req, res) => {
   seatnumbers
     } = req.body;
 
-    console.log(req.body);
+    
     
     // ✅ Check required fields
     if (!customerName || !customerEmail || !customerPhone || !packageName || !travelDate) {
@@ -200,7 +200,10 @@ const onlyDate = travelDateObj.toISOString().slice(0, 10);
   //   // ✅ Send WhatsApp Message using Twilio (Plain Text)
   const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
-    await client.messages.create({
+    let whatsappResponse;
+
+  try {
+    whatsappResponse = await client.messages.create({
       to: `whatsapp:+91${customerPhone}`,
       from: 'whatsapp:+17245585975',
       contentSid: 'HX172797fc60d7cd326db4b9431574deb8',
@@ -219,6 +222,25 @@ const onlyDate = travelDateObj.toISOString().slice(0, 10);
       })
     });
 
+
+    // Optional: check for errors in the response object
+    if (whatsappResponse.errorCode || whatsappResponse.errorMessage) {
+      return res.status(400).json({
+        success: false,
+        message: `WhatsApp message failed: ${whatsappResponse.errorMessage || 'Unknown error'}`,
+      });
+    }
+
+  } catch (twilioError) {
+    console.error("Twilio Error:", twilioError);
+    return res.status(400).json({
+      success: false,
+      message: `Twilio WhatsApp error: ${twilioError.message || 'Unknown Twilio error'}`,
+    });
+  }
+
+
+    
 const customerIndex=0
 const status="Confirmed"
 const booking = await Customer.findById(bookingId);

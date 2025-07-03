@@ -47,7 +47,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
     const token = jwt.sign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
   
     res.cookie('Admintoken', token, {  httpOnly: true,  sameSite: 'None',
-      //  secure: true,
+       // secure: true,
        secure: process.env.NODE_ENV === 'production' });
 
   res.status(200).json({ success: true, message: 'Login successful', admin,token });
@@ -154,7 +154,7 @@ export const dashboardData = async (req, res) => {
 
 export const logout = asyncHandler(async (req, res) => {
     try {
-      res.cookie('Admintoken', '', { httpOnly: true, expires: new Date(0) });
+      res.cookie('Admintoken', '', { httpOnly: true,sameSite: 'None', expires: new Date(0) });
       res.status(200).json({ success: true, message: 'Admin logged out successfully' });
     } catch (error) {
       res.status(500).json({ success: false, error: 'Failed to log out' });
