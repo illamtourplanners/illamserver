@@ -1,18 +1,28 @@
 import expenseSchema from "../model/expenseSchema.js";
+import { Package } from "../model/packageSchema.js";
 
 
 
 export const createExpense = async (req, res) => {
   try {
-    const { category, categoryname, rupee, quantity, paymentMethode, date } = req.body;
+    const { packageId, category, categoryname, rupee, quantity, paymentMethode, date } = req.body;
 
-    if (!category || !categoryname || !rupee || !quantity || !paymentMethode) {
+    console.log(req.body);
+    
+    if (!packageId || !category || !categoryname || !rupee || !quantity || !paymentMethode) {
       return res.status(400).json({ success: false, message: "All fields are required." });
+    }
+
+    // Validate package exists
+    const packageExists = await Package.findById(packageId);
+    if (!packageExists) {
+      return res.status(404).json({ success: false, message: "Package not found." });
     }
 
     const finalDate = date || new Date().toISOString().split('T')[0];
 
     const newExpense = new expenseSchema({
+      packageId,
       category,
       categoryname,
       rupee,
@@ -23,7 +33,11 @@ export const createExpense = async (req, res) => {
 
     await newExpense.save();
 
-    res.status(201).json({ success: true, message: "Expense created successfully", data: newExpense });
+    res.status(201).json({
+      success: true,
+      message: "Expense linked to package created successfully",
+      data: newExpense,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
@@ -77,10 +91,17 @@ export const deleteExpenseById = async (req, res) => {
 
 // GET All Expenses
 export const getAllExpenses = async (req, res) => {
-try {
-    const expenses = await expenseSchema.find();
-    res.status(200).json({ success: true, expenses });
+  try {
+    const { packageId } = req.params;
+
+    const expenses = await expenseSchema.find({ packageId });
+
+    res.status(200).json({
+      success: true,
+      data: expenses
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    console.error("Error fetching expenses by packageId:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
   }
 };

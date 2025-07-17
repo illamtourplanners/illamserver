@@ -7,6 +7,7 @@ import checkouteRoute from "./customerRoutes.js";
 import passengerRoute from "./passengerRoute.js";
 import adminRoute from "./adminRoute.js";
 import tourRoute from "./tourRoute.js";
+import contactRoute from "./contactRoute.js";
 const router = express.Router();
 
 router.use('/package', packageRoute);
@@ -15,4 +16,5 @@ router.use('/passenger', passengerRoute);
 router.use('/tour', tourRoute);
 router.use('/expense', exspenseRoute);
 router.use('/admin', adminRoute);
+router.use('/contact', contactRoute);
 export default router;

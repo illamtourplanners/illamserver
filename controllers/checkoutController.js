@@ -6,90 +6,100 @@ import { customerSchema } from '../validation/customerJoi.js';
 import { cloudinaryInstance } from "../config/cloudinaryConfig.js";
 import nodemailer from 'nodemailer'
 import twilio from 'twilio';
+import Razorpay from 'razorpay';
+import crypto from "crypto";
 function generatePNR() {
   const random = Math.random().toString(36).substring(2, 6).toUpperCase(); // 4 char
   const timePart = Date.now().toString().slice(-6); // last 6 digits of timestamp
   return `BKN${timePart}${random}`;
 }
 
+const razorpayInstance = new Razorpay({
+  key_id: process.env.RAZORPAY_ID,
+  key_secret: process.env.RAZORPAY_SECRET,
+});
 export const makeCheckout = async (req, res) => {
+  const { amount, currency, receipt } = req.body;
+
   try {
+    const options = {
+      amount: amount * 100, // Razorpay expects amount in paise
+      currency,
+      receipt,
+    };
 
+    const order = await razorpayInstance.orders.create(options);
 
-    const {
-      packageName,
-      packageDate,
-      packageDetails,
-      amount,
-      totalPerPerson,
-      name,
-      advancePayment,
-      customers
-    } = req.body;
-
-    // Joi validation
-    const { error } = customerSchema.validate({ packageName, packageDate });
-    if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-
-    // Parse JSON strings
-    const parsedCustomers = typeof customers === "string" ? JSON.parse(customers) : customers;
-    const parsedPackageDetails = typeof packageDetails === "string" ? JSON.parse(packageDetails) : packageDetails;
-
-    if (!Array.isArray(parsedCustomers) || parsedCustomers.length === 0) {
-      return res.status(400).json({
-        message: 'Customer list is required and must contain at least one customer',
-      });
-    }
-
-    if (!amount || !name) {
-      return res.status(400).json({
-        message: 'Amount and name are required',
-      });
-    }
-
-    const transactionId = 'TXN_' + Date.now();
-    const pnr = generatePNR();
-
-    let imageUrl = "";
-    if (req.file) {
-      const result = await cloudinaryInstance.uploader.upload(req.file.path, {
-        folder: "client-payments"
-      });
-      imageUrl = result.secure_url;
-    }
-
-
-
-    
-    const newCheckout = new Customer({
-      packageName,
-      packageDate,
-      packageDetails: parsedPackageDetails,
-      customers: parsedCustomers,
-      transactionId,
-      bookingNumber: pnr,
-      amount,
-      totalPerPerson,
-      advancePayment,
-      image: imageUrl,
-
-    });
-
-    await newCheckout.save();
-
-    return res.status(200).json({
-      success: true,
-      message: 'Checkout successful. No payment gateway used.',
-      transactionId,
-    });
+    res.status(200).json({ success: true, order });
 
   } catch (error) {
     console.error('Checkout error:', error);
     return res.status(500).json({ message: error.message });
   }
 };
+
+
+export const verifyPayment = (async (req, res) => {
+  try {
+    const {
+      packageName,
+      packageDate,
+      packageDetails,
+      customers,
+      amount,
+      name,
+      totalPerPerson,
+      advancePayment,
+      razorpay_payment_id,
+      razorpay_order_id,
+      razorpay_signature,
+    } = req.body;
+
+    console.log(req.body);
+    
+    // Step 1: Verify signature
+    const generatedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_SECRET)
+      .update(razorpay_order_id + "|" + razorpay_payment_id)
+      .digest("hex");
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({ success: false, message: "Payment verification failed" });
+    }
+
+    // Step 2: Save to DB or further processing
+    const transactionId = `TXN-${Date.now()}`;
+
+    const newBooking = new Customer({
+      packageName,
+      packageDate,
+      packageDetails: JSON.parse(packageDetails),
+      customers: JSON.parse(customers),
+      amount,
+      name,
+      totalPerPerson,
+      advancePayment,
+      transactionId,
+      bookingNumber:generatePNR(),
+      paymentId: razorpay_payment_id,
+      orderId: razorpay_order_id,
+     
+    });
+
+    await newBooking.save();
+
+    // Step 3: Send success response
+    res.status(200).json({
+      success: true,
+      message: "Payment verified and booking confirmed",
+      transactionId,
+    });
+
+  } catch (error) {
+    console.error("Error in verifyPayment:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
 
 
 export const getAllBookings = async (req, res) => {
@@ -342,6 +352,29 @@ export const deleteCustomerFromBooking = async (req, res) => {
     });
   } catch (error) {
     console.error("Error removing customer:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+
+
+export const getByBookingNumber = async (req, res) => {
+  const { bookingNumber } = req.query;
+  
+    try {
+      const bookings = await Customer.find({ bookingNumber });
+  
+      // console.log(bookings);
+      
+      if (!bookings || bookings.length === 0) {
+        return res.status(404).json({ success: false, message: "No bookings found for this package number" });
+      }
+  
+      res.status(200).json({ success: true, data: bookings });
+  } catch (error) {
+    console.error("Error fetching all bookings:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };

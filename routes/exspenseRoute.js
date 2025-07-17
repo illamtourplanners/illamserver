@@ -9,5 +9,5 @@ router.get('/ExpenseById/:id', getExpenseById);            // Get by ID
 router.put('/update/:id', updateExpenseById);         // Update by ID
 router.delete('/delete/:id', deleteExpenseById);      // Delete by ID
 
-router.get('/getAll', getAllExpenses);   
+router.get('/getAll/:packageId', getAllExpenses);   
 export  default router
