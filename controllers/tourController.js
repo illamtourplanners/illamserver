@@ -65,3 +65,22 @@ export const deletePost =async(req,res)=>{
     
   }
 }
+
+
+export const postLike=async(req,res)=>{
+  try {
+    const {id}=req.params
+    const tour=await Tour.findById(id)
+    if(!tour) {
+      return res.status(404).json({status:"failure",message:"Post not found"})
+      }
+      tour.likes += 1;
+    await tour.save();
+
+    res.status(200).json({ success: true, likes: tour.likes });
+    
+  } catch (error) {
+    console.log(error);
+    
+  }
+}
