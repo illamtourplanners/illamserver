@@ -125,6 +125,27 @@ export const getAllPackages = async (req, res) => {
   }
 };
 
+export const getPackagesByStatus = async (req, res) => {
+  try {
+   const packages = await Package.find({ status: "Activate" });
+
+
+   
+    return res.status(200).json({
+      success: true,
+      data: packages,
+    });
+  } catch (error) {
+    console.error("Error fetching packages:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      
+    });
+    
+  }
+};
+
 // GET BY ID
 export const getPackageById = async (req, res) => {
   try {
@@ -236,3 +257,34 @@ export const deletePackage = async (req, res) => {
   }
 };
 
+
+export const isActivePackage = async (req, res) => {
+  try {
+    const { id, status } = req.body;
+console.log(status);
+
+    if (!id || !status) {
+      return res.status(400).json({ success: false, message: "ID and status are required" });
+    }
+
+    const packageToUpdate = await Package.findById(id);
+console.log(packageToUpdate.status);
+
+    if (!packageToUpdate) {
+      return res.status(404).json({ success: false, message: "Package not found" });
+    }
+
+    packageToUpdate.status = status;
+    await packageToUpdate.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Package status updated to ${status}`,
+      data: packageToUpdate,
+    });
+
+  } catch (error) {
+    console.error("Error updating package status:", error);
+    return res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+};

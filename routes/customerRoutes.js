@@ -17,7 +17,7 @@ router.get("/bookingdetail/:id", getBookingById);
 router.get("/confirmation/:transactionId", getByTransactionId);
 router.delete('/booking/:bookingId', deleteCustomerFromBooking);
 
-router.post("/confirm", confirmBooking);
+router.post("/statusConfirm", confirmBooking);
 
 router.get("/getcount", getAllBookingsCount);
 

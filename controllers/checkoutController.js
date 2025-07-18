@@ -8,6 +8,7 @@ import nodemailer from 'nodemailer'
 import twilio from 'twilio';
 import Razorpay from 'razorpay';
 import crypto from "crypto";
+
 function generatePNR() {
   const random = Math.random().toString(36).substring(2, 6).toUpperCase(); // 4 char
   const timePart = Date.now().toString().slice(-6); // last 6 digits of timestamp

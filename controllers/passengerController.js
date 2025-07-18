@@ -66,4 +66,3 @@ export const updateBoardingStatus = async (req, res) => {
   }
 };
 
-

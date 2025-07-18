@@ -56,6 +56,11 @@ const packageSchema = new mongoose.Schema({
     required:[true,'Description is required'],
 
   },
+   status: {
+    type: String,
+    enum: ['Deactivate', 'Activate'],
+    default: 'Activate',
+  },
   discount: {
     type: Number,
     default: 0,
