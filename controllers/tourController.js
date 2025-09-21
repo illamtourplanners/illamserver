@@ -1,5 +1,7 @@
 import { cloudinaryInstance } from "../config/cloudinaryConfig.js";
 import { Tour } from "../model/tourSchema.js";
+import { Video } from "../model/videoSchema.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
 
 export const createNewPost = async (req, res) => {
@@ -83,4 +85,39 @@ export const postLike=async(req,res)=>{
     console.log(error);
     
   }
+}
+
+
+export const createVideo = asyncHandler(async (req, res) => {
+  const { title, description } = req.body;
+
+  if (!req.file) {
+    return res.status(400).json({ status: "failure", message: "Video file is required" });
+  }
+
+  // Upload video to Cloudinary
+  const result = await cloudinaryInstance.uploader.upload(req.file.path, {
+    folder: "tours/videos",
+    resource_type: "video",
+  });
+
+  const newPost = await Video.create({
+    title,
+    description,
+    video: result.secure_url,
+  });
+
+  res.status(201).json({
+    status: "success",
+    message: "Video post created successfully",
+    newPost,
+  });
+});
+
+export const getVideo=async(req,res)=>{
+  const data=await Video.find()
+  res.status(201).json({
+ data
+  });
+
 }
